@@ -1,0 +1,127 @@
+/*EXPERIMENT NO.5 : AGGREGATE FUNCTIONS*/
+
+/*1.List total loan*/
+SELECT SUM (AMOUNT) FROM BORROW;
+
+/*2.List total deposit*/
+SELECT SUM (AMOUNT) FROM DEPOSIT;
+
+/*3.List total loan taken from KAROLBAGH branch*/
+SELECT MAX(AMOUNT) FROM BORROW WHERE BNAME ='KAROLBAGH';
+
+/* 4.List total deposit of customers having account date later than 1-Jan-96*/
+SELECT SUM(AMOUNT) from deposit where adate>'1995-03-01';
+
+/* 5.List total deposit of customers living in city NAGPUR*/
+SELECT SUM(D1.AMOUNT) FROM DEPOSIT D1 , CUSTOMER C1 WHERE C1.CITY = 'NAGPUR' AND C1.CNAME = D1.CNAME;
+
+/*6.List maximum deposit of customer living in Bombay*/
+SELECT MAX(D1.AMOUNT) FROM DEPOSIT D1 , CUSTOMER C1 WHERE C1.CITY = 'Bombay' AND C1.CNAME = D1.CNAME;
+
+/* 7.List total deposit of customer having branch in BOMBAY*/
+SELECT SUM (AMOUNT) from deposit,BRANCH where city='BOMBAY';
+
+/* 8.Count total number of branch cities*/
+SELECT COUNT(DISTINCT (CITY)) FROM BRANCH ;
+
+/*9.Count total number of customers cities*/
+SELECT count(city) from CUSTOMER;
+
+/* 10.Give branch names and branch wise deposit*/
+SELECT BNAME , SUM(AMOUNT) FROM DEPOSIT GROUP BY BNAME;
+
+/*11.Give city wise name and branch wise deposit*/
+SELECT C1.CITY , SUM(D1.AMOUNT) FROM CUSTOMER C1 , DEPOSIT D1 WHERE D1.CNAME = C1.CNAME GROUP BY C1.CITY;
+
+/*12.Give the branch wise loan of customer living in NAGPUR*/
+SELECT BNAME , SUM(AMOUNT) FROM BORROW,CUSTOMER  WHERE city ='NAGPUR' GROUP BY BNAME;
+
+/*13.Count total number of customers*/
+SELECT count(cname) from CUSTOMER;
+
+/*14.Count total number of depositors branch wise*/
+SELECT BName, count (*)from DEPOSIT, CUSTOMER where deposit.CNAME = CUSTOMER.CNAME group by BNAME
+
+/*15.Count total number of depositors branch wise*/
+SELECT BName, count (*)from DEPOSIT, CUSTOMER where deposit.CNAME = CUSTOMER.CNAME group by BNAME
+
+/*16.Give maximum loan from branch VRCE*/
+SELECT MAX(AMOUNT) FROM BORROW WHERE BNAME ='VRCE';
+
+/*17.Give  the number of customers who are depositors as well as borrowers*/
+SELECT COUNT(DISTINCT (CNAME)) FROM CUSTOMER WHERE CNAME IN ((SELECT CNAME FROM DEPOSIT) INTERSECT (SELECT CNAME FROM  BORROW));
+
+
+/*EXPERIMENT NO.6 : SET OPERATIONS*/
+
+/1. List all the customers who are depositors but not borrowers./
+SELECT CNAME FROM DEPOSIT  MINUS SELECT CNAME FROM BORROW;
+
+/2. List all the customers who are both depositors and borrowers/
+SELECT CNAME FROM DEPOSIT  UNION  (SELECT CNAME FROM BORROW);
+
+/3. List all the depositors having deposit in all the branches where Sunil is having Account/
+SELECT D1.CNAME FROM DEPOSIT D1 WHERE D1.BNAME IN (SELECT D2.BNAME FROM DEPOSIT D2 WHERE D2.CNAME = 'SUNIL' );
+
+/4. List all the customers living in city NAGPUR and having branch city BOMBAY or DELHI/
+SELECT C1.CNAME FROM CUSTOMER C1,DEPOSIT D1, BRANCH B1 WHERE C1.CITY = 'NAGPUR' AND C1.CNAME = D1.CNAME AND D1.BNAME = B1.BNAME AND B1.CITY IN ('BOMBAY','DELHI');
+
+/5. List all the depositors living in city NAGPUR/
+SELECT Distinct(CUSTOMER.CNAME) from CUSTOMER,DEPOSIT WHERE City='NAGPUR';
+
+/6. List all the depositors living in the city NAGPUR and having branch in city BOMBAY/
+SELECT C1.CNAME FROM CUSTOMER C1,DEPOSIT D1, BRANCH B1 WHERE C1.CITY = 'NAGPUR' AND C1.CNAME = D1.CNAME AND D1.BNAME = B1.BNAME AND B1.CITY IN ('BOMBAY');
+
+/7. List the branch cities of Anil and Sunil/
+SELECT B1.CITY FROM DEPOSIT D1, BRANCH B1 WHERE D1.BNAME = B1.BNAME AND D1.CNAME IN ('SUNIL' ,'ANIL');
+
+/8. List the customers having deposit greater than 1000 and loan less than 10000./
+SELECT DISTINCT D1.CNAME FROM deposit D1, borrow B1 WHERE D1.AMOUNT>1000 AND B1.AMOUNT<10000;
+
+/9. List the cities of depositors having branch VRCE./
+SELECT B1.CITY FROM deposit D1, branch B1 WHERE D1.BNAME=B1.BNAME AND B1.BNAME='VRCE';
+
+/10. List the depositors having amount less than 1000 and living in the same city as Anil/
+SELECT D1.CNAME FROM deposit D1, customer C1 WHERE AMOUNT<1000 AND C1.CITY=(C1.CNAME='ANIL');
+
+/11. List all the cities where branches of Anil and Sunil are locate/
+SELECT B1.CITY FROM BRANCH B1 WHERE B1.BNAME IN (SELECT D1.BNAME FROM DEPOSIT D1 WHERE D1.CNAME IN ('ANIL','SUNIL'));
+
+/12. List the amount for the depositors living in the city where Anil is living/
+SELECT DISTINCT(D1.CNAME),D1.AMOUNT ,C1.CITY FROM deposit D1, CUSTOMER C1, BRANCH B1 WHERE D1.CNAME=C1.CNAME AND C1.CITY IN(SELECT C2.CITY FROM customer C2 WHERE C2.CNAME='ANIL');
+
+
+
+/*EXPERIMENT NO.7 : JOIN OR CARTESIAN PRODUCT*/
+
+/*1.Give name of customers having living city BOMBAY and branch city NAGPUR*/
+SELECT D1.CNAME,D1.BNAME,C1.CNAME,C1.CITY,B1.CITY,B1.BNAME FROM DEPOSIT D1,CUSTOMER C1,BRANCH B1 WHERE C1.CITY = 'BOMBAY' AND B1.CITY = 'NAGPUR' AND D1.CNAME = C1.CNAME AND D1.BNAME = B1.BNAME;
+
+/*2.Give names of customers having the same living city as their branch city*/
+SELECT distinct(customer.CNAME), BRANCH.CITY FROM BRANCH, customer WHERE BRANCH.city = customer.city;
+
+/*3.Give names of customers who are borrowers as well as depositors and having city NAGPUR.*/
+SELECT C1.CNAME FROM CUSTOMER C1,DEPOSIT D1,BORROW B1 WHERE C1.CITY='NAGPUR'  AND C1.CNAME=D1.CNAME  AND D1.CNAME = B1.CNAME;
+
+/*4.Give names of borrowers having deposit amount greater than 1000 and loan amount greater than 2000.*/
+SELECT BR1.CNAME, BR1.AMOUNT, D1.CNAME, D1.AMOUNT  FROM BORROW BR1,DEPOSIT D1 WHERE D1.CNAME = BR1.CNAME AND D1.AMOUNT > 1000 AND BR1.AMOUNT > 2000;
+
+/*5.Give names of depositors having the same branch as the branch of Sunil*/
+SELECT D1.CNAME FROM  DEPOSIT D1 WHERE D1.BNAME IN (SELECT  D2.BNAME FROM DEPOSIT D2 WHERE D2.CNAME = 'SUNIL');
+
+/*6.Give names of borrowers having loan amount greater than the loan amount of Pramod*/
+SELECT BR1.CNAME,BR1.AMOUNT FROM BORROW BR1 WHERE BR1.AMOUNT > ALL (SELECT BR2.AMOUNT FROM BORROW BR2 WHERE BR2.CNAME = 'PRAMOD');
+
+/*7.Give the name of the customer living in the city where branch of depositor Sunil is located.*/
+SELECT C.CNAME FROM CUSTOMER C WHERE C.CITY IN (SELECT B.CITY FROM BRANCH B WHERE B.BNAME IN (SELECT D.BNAME FROM DEPOSIT D WHERE D.CNAME='SUNIL'));
+
+/*8.Give branch city and living city of Pramod*/
+SELECT B1.CITY , C1.CITY FROM BRANCH B1,CUSTOMER C1, DEPOSIT D1 WHERE C1.CNAME = 'PRAMOD' AND C1.CNAME = D1.CNAME AND D1.BNAME = B1.BNAME;
+
+/*9.Give branch city of Sunil and branch city of Anil*/
+SELECT B1.CITY FROM DEPOSIT D1, BRANCH B1 WHERE D1.BNAME = B1.BNAME AND D1.CNAME IN ('SUNIL' ,'ANIL');
+
+/*10.Give the living city of Anil and the living city of Sunil*/
+SELECT C1.CNAME, C1.CITY FROM CUSTOMER C1 WHERE C1.CNAME = 'ANIL' OR C1.CNAME = 'SUNIL';
+
+
